@@ -31,4 +31,5 @@ def ml_fcst():
         prediction = price_forecast(forecast_date, forecast_stock)
         return render_template('index.html', value=prediction)
 
-app.run(port=8080)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0',port=8080)

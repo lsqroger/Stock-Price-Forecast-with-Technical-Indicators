@@ -2,12 +2,12 @@ flask
 pylint
 numpy
 pandas
-pickle
 lightgbm
 ta
 yfinance
 datetime
-scikit-learn
+scikit-learn==0.23.2
 scikit-optimize
 matplotlib
 seaborn
+awsebcli
