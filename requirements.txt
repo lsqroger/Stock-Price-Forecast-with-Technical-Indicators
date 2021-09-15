@@ -1,0 +1,13 @@
+flask
+pylint
+numpy
+pandas
+pickle
+lightgbm
+ta
+yfinance
+datetime
+scikit-learn
+scikit-optimize
+matplotlib
+seaborn
