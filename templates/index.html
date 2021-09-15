@@ -1,0 +1,50 @@
+<style>
+    table {
+        border-collapse: collapse;
+    }
+    table, th, td {
+        border: 1px solid black;
+    }
+    th, td {
+        padding: 10px;
+    }
+    th {
+        text-align: left;
+    }
+</style>
+
+<center>
+    <img src='static/cover.jpg'>
+    <br>
+    <form method="POST">
+        <label>Enter a date to predict direction of price change (e.g. 2021-09-03): </label>
+        <input name="date">
+        <br>
+        <label>Enter ticker of the stock to be predicted (e.g. MSFT)</label>
+        <input name='ticker'>
+        <br>
+        <input type="submit">
+        <br>
+        {% if value == null%}
+        <p><b> No prediction is made yet </b></p>
+        {% else %}
+        <p><b>Prediction Result: </b></p>
+        <table>
+            <tr>
+                <th>Stock Ticker</th>
+                <th>Current Close Price</th>
+                <th>Previous Close Price (t-7)</th>
+                <th>Actual Change</th>
+                <th>Predicted Change</th>
+            </tr>
+            <tr>
+                <td>{{ value['ticker'] }}</td>
+                <td>{{ value['Current_Close'] }}</td>
+                <td>{{ value['Prev_Close'] }}</td>
+                <td>{{ value['Actual'] }}</td>
+                <td>{{ value['Pred'] }}</td>
+            </tr>
+        </table>
+
+        {% endif %}
+</center>
