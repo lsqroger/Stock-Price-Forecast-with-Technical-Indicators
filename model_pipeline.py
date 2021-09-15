@@ -19,8 +19,8 @@ warnings.filterwarnings("ignore")
 
 
 def price_forecast(fcst_date, input_ticker):
-    msft = yf.Ticker(input_ticker)
-    history = msft.history(period='Max')
+    stock = yf.Ticker(input_ticker)
+    history = stock.history(period='Max')
     meta_cols = history.columns
     history.tail()
 
@@ -39,12 +39,20 @@ def price_forecast(fcst_date, input_ticker):
     df_lagged = ta_df.copy()
     df_lagged[feature_cols] = df_lagged[feature_cols].apply(lambda x: x.shift(lag_length))
     df_lagged['Close_prev'] = df_lagged['Close'].shift(lag_length)
-
-    ### Include only data in the specified time window
-    start_date = pd.to_datetime(forecast_date)-pd.DateOffset(years=history_win)
-    start_date = start_date.strftime("%Y-%m-%d")
-
     df_lagged.reset_index(drop=False, inplace=True)
+    max_date = df_lagged.Date.max()
+    ### Include only data in the specified time window
+    if pd.to_datetime(forecast_date) > max_date:
+        start_date = pd.to_datetime(max_date)-pd.DateOffset(years=history_win)
+    else:
+        start_date = pd.to_datetime(forecast_date)-pd.DateOffset(years=history_win)
+    
+    start_date = start_date.strftime("%Y-%m-%d")
+    
+    ### if a future date is passed, only dates within future 7 days are allowed
+    if (pd.to_datetime(forecast_date)-pd.to_datetime(max_date)).days > 7:
+        return {"error":"error", "max_date":max_date}
+    
     df_lagged = df_lagged.loc[(df_lagged.Date >= start_date)&(df_lagged.Date <= forecast_date)]
     temp_rows = df_lagged.shape[0]
     df_lagged.dropna(axis=0, inplace=True)
@@ -117,7 +125,7 @@ def price_forecast(fcst_date, input_ticker):
     model_lgb = lgb.LGBMClassifier(random_state=random_seed, n_jobs=-1)
 
     start_time = time.time()
-    bayes_gs = BayesSearchCV(model_lgb, params_grid, scoring='roc_auc', cv=5, n_iter=50, n_jobs=-1, random_state=random_seed)
+    bayes_gs = BayesSearchCV(model_lgb, params_grid, scoring='roc_auc', cv=3, n_iter=30, n_jobs=-1, random_state=random_seed)
     bayes_gs.fit(X_train[feature_cols], y_train)
     end_time = time.time()
     print(f"Hyperparamter Tuning time: {round((end_time-start_time)/60, 2)} mins")
@@ -164,13 +172,43 @@ def price_forecast(fcst_date, input_ticker):
 
 
     # ## 3. Prediction
-
-    oos_pred = final_model.predict(test_data[feature_cols])
-    dict_result = {'ticker': input_ticker,
-                   'Current_Close': round(test_data.Close.values[0], 3),
-                   'Prev_Close': round(test_data.Close_prev.values[0], 3),
-                   'Actual': np.where(test_data.label.values[0]==0, 'Down','Up'),
-                   'Pred': np.where(oos_pred[0]==0, 'Down','Up')}
+    if pd.to_datetime(forecast_date) > max_date:
+        diff_days = pd.to_datetime(forecast_date)-pd.to_datetime(max_date)
+        diff_days = diff_days.days
+        if diff_days > 7 and diff_days <= 9:
+            diff_days = 7
+            
+        feature_date = pd.to_datetime(max_date) - pd.DateOffset(days=7-diff_days)
+        feature_date = feature_date.strftime("%Y-%m-%d")
+        data_pred = df_lagged.loc[df_lagged.Date == feature_date, feature_cols]
+        oos_pred = final_model.predict(data_pred)
+        
+        dict_result = {'ticker': input_ticker,
+                       'fcst_date': fcst_date,
+                       'Pred': np.where(oos_pred[0]==0, 'Down','Up'),
+                       'flag': 'future',
+                       'val_true': y_test,
+                       'val_pred':validation_proba[:, 1],
+                       'val_class': validation_preds,
+                       'error': 'None'
+        }
+        
+    else:    
+        oos_pred = final_model.predict(test_data[feature_cols])
+    
+        dict_result = {'ticker': input_ticker,
+                       'fcst_date': fcst_date,
+                       'Current_Close': round(test_data.Close.values[0], 3),
+                       'Prev_Close': round(test_data.Close_prev.values[0], 3),
+                       'Actual': np.where(test_data.label.values[0]==0, 'Down','Up'),
+                       'Pred': np.where(oos_pred[0]==0, 'Down','Up'),
+                       'flag': 'history',
+                       'val_true': y_test,
+                       'val_pred':validation_proba[:, 1],
+                       'val_class': validation_preds,
+                       'error':'None'
+        }
+                       
     print("Run Success")
 
     return dict_result

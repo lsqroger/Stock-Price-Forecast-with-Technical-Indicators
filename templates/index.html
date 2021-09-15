@@ -1,35 +1,224 @@
 <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+    
+    [class*="col-"] {
+      float: left;
+      padding: 15px;
+    }
+    
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+    
+    html {
+      font-family: "Lucida Sans", sans-serif;
+    }
+    
+    .header {
+      background-color: #138EE6;
+      color: #ffffff;
+      padding: 15px;
+    }
+    
+    .menu ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .menu li {
+      padding: 8px;
+      margin-bottom: 7px;
+      background-color: #E07710;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    
+    input[type=text] {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 3px solid #ccc;
+      -webkit-transition: 0.5s;
+      transition: 0.5s;
+      outline: none;
+    }
+    
+    .submit {
+      background-color: #E07710;
+      border: none;
+      color: white;
+      padding: 16px 32px;
+      text-align: center;
+      font-size: 16px;
+      margin: 4px 2px;
+      opacity: 0.6;
+      transition: 0.3s;
+      display: inline-block;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .submit:hover {opacity: 1}
+    
+    input[type=text]:focus {
+      border: 3px solid #555;
+    }
+        
     table {
-        border-collapse: collapse;
+      border-collapse: collapse;
+      width: 100%;
     }
-    table, th, td {
-        border: 1px solid black;
-    }
+    
     th, td {
-        padding: 10px;
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
-    th {
-        text-align: left;
-    }
+    
 </style>
 
+<div class="header">
+    <h1> Forecast Stock Price Change with Technical Indicators and Machine Learning Model </h1>
+    <h4><em>A mini project by Roger Liu</em></h4>
+</div>
+
+<div class="row">
+  <div class="col-3 menu">
+    <h5 style="text-align:justify;line-height:1.6">
+    This project delivers a ML predictive model that predicts the direction of price change for a specified stock. 
+    The model is utilizing various technical indicator (TA) values of the stock at the moment to forecast the stock's price change 7 days later (i.e. 'Up' or 'Down'),
+    with recent 2 years of historical daily price and TA data used as training set.
+    Historical data of stocks are extracted on demand from Yahoo!Finance website through <a href='https://pypi.org/project/yfinance/'><em>yfinance</em></a> python package,
+    and technical indicators are constructed using <a href='https://pypi.org/project/ta/'><em>ta</em></a> python package.
+    </h5>
+    <ul>
+      <li>Model: LightGBM</li>
+      <li>Feature: Technical Indicators</li>
+      <li>Feature Selection: Embedded</li>
+      <li>Hyperparameter Tuning: Bayesian</li>
+    </ul>
+  </div>
+
+  <div class="col-9">
+    <img src='static/cover.jpg' height=300 width=600>
+    <br><br>
+    <form method="POST">
+        <div class='field1'>
+            <label>Enter a forecast date (e.g. 2021-09-03): </label>
+            <input type='text' name="date">
+        </div>
+        <br><br>
+        <label>Enter a stock ticker (e.g. MSFT)</label>
+        <input type='text' name='ticker'>
+        <br>
+        <input class='submit' type="submit" value='Start'>
+        <p> Prediction may take a few minutes...</p>
+        <br>
+        {% if value == null%}
+        <h3><b> No prediction is made yet </b></h3>
+        {% else %}
+        {% if value['error'] == "error" %}
+        <h3><b>Input date is beyond next 7 days (latest trading date: {{ value['max_date'] }} ) </b></h3>
+        {% else %}
+        {% if value['flag'] == 'history' %}
+        <h3><b><u>Prediction Result (Backtest): </u></b></h3>
+        <table>
+            <tr>
+                <th>Stock Ticker</th>
+                <th>Forecast Date</th>
+                <th>Actual Close Price</th>
+                <th>Previous Close Price (t-7)</th>
+                <th>Actual Change</th>
+                <th>Predicted Change</th>
+            </tr>
+            <tr>
+                <td>{{ value['ticker'] }}</td>
+                <td>{{ value['fcst_date'] }}</td>
+                <td>{{ value['Current_Close'] }}</td>
+                <td>{{ value['Prev_Close'] }}</td>
+                <td>{{ value['Actual'] }}</td>
+                <td>{{ value['Pred'] }}</td>
+            </tr>
+        </table>
+        {% else %}
+        <h3><b><u>Prediction Result (Future): </u></b></h3>
+        <table>
+            <tr>
+                <th>Stock Ticker</th>
+                <th>Forecast Date</th>
+                <th>Predicted Change</th>
+            </tr>
+            <tr>
+                <td>{{ value['ticker'] }}</td>
+                <td>{{ value['fcst_date'] }}</td>
+                <td>{{ value['Pred'] }}</td>
+            </tr>
+        </table>
+        {% endif %}
+        <br>
+        <h3><b><u> Validation Set Performance: </u></b></h3>
+        <table>
+            <tr>
+                <th>Accuracy</th>
+                <th>F1 Score</th>
+                <th>ROC AUC</th>
+            </tr>
+            <tr>
+                <td> {{ value['val_accuracy'] }}</td>
+                <td> {{ value['val_f1'] }}</td>
+                <td> {{ value['val_auc'] }}</td>
+            </tr>
+        </table>
+        <h4><b> ROC Curve: </b></h4>
+        <img src={{ value['figure_link'] }} height=400 width=550>
+        <h4><b> Confusion Matrix: </b></h4>
+        <img src={{ value['cm_link'] }} height=400 width=550>
+        {% endif %}
+        {% endif %}
+  </div>
+</div>
+
+<!--
 <center>
-    <img src='static/cover.jpg'>
+    <img src='static/cover.jpg' height=300 width=600>
     <br>
     <form method="POST">
         <label>Enter a date to predict direction of price change (e.g. 2021-09-03): </label>
         <input name="date">
-        <br>
+        <br><br>
         <label>Enter ticker of the stock to be predicted (e.g. MSFT)</label>
         <input name='ticker'>
         <p> Prediction process may take a few minutes...</p>
         <br>
-        <input type="submit">
+        <input type="submit" value='Predict'>
         <br>
         {% if value == null%}
-        <p><b> No prediction is made yet </b></p>
+        <h3><b> No prediction is made yet </b></h3>
         {% else %}
-        <p><b>Prediction Result: </b></p>
+        {% if value['error'] == "error" %}
+        <h3><b>Input date is beyond next 7 days (latest trading date: {{ value['max_date'] }} ) </b></h3>
+        {% else %}
+        {% if value['flag'] == 'history' %}
+        <h3><b>Prediction Result (Backtest): </b></h3>
         <table>
             <tr>
                 <th>Stock Ticker</th>
@@ -46,6 +235,22 @@
                 <td>{{ value['Pred'] }}</td>
             </tr>
         </table>
-
+        {% else %}
+        <h3><b>Prediction Result (Future): </b></h3>
+        <table>
+            <tr>
+                <th>Stock Ticker</th>
+                <th>Predicted Change</th>
+            </tr>
+            <tr>
+                <td>{{ value['ticker'] }}</td>
+                <td>{{ value['Pred'] }}</td>
+            </tr>
+        </table>
         {% endif %}
-</center>
+        <br>
+        <h4><b> ROC Curve of Validation Predictions: </b></h4>
+        <img src={{ value['figure_link'] }} height=400 width=800>
+        {% endif %}
+        {% endif %}
+</center> -->
