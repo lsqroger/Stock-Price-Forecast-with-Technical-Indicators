@@ -82,7 +82,40 @@
     input[type=text]:focus {
       border: 3px solid #555;
     }
-        
+    
+    .bg-image {
+      /* The image used */
+      background-image: url("../static/cover.jpg");
+      
+      /* Add the blur effect */
+      filter: blur(8px);
+      -webkit-filter: blur(8px);
+      
+      /* Full height */
+      height: 100%; 
+      
+      /* Center and scale the image nicely */
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+
+    .bg-text {
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
+      color: white;
+      font-weight: bold;
+      border: 3px solid #f1f1f1;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      width: 80%;
+      padding: 20px;
+      text-align: center;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -96,10 +129,12 @@
     
 </style>
 
-<div class="header">
-    <h1> Forecast Stock Price Change with Technical Indicators and Machine Learning Model </h1>
+<div class="bg-image"></div>
+<div class='bg-text'>
+    <h1> Forecast Change in Stock Price with Technical Indicators and Machine Learning Model </h1>
     <h4><em>A mini project by Roger Liu</em></h4>
 </div>
+
 
 <div class="row">
   <div class="col-3 menu">
@@ -107,7 +142,7 @@
     This project delivers a ML predictive model that predicts the direction of price change for a specified stock. 
     The model is utilizing various technical indicator (TA) values of the stock at the moment to forecast the stock's price change 7 days later (i.e. 'Up' or 'Down'),
     with recent 2 years of historical daily price and TA data used as training set.
-    Historical data of stocks are extracted on demand from Yahoo!Finance website through <a href='https://pypi.org/project/yfinance/'><em>yfinance</em></a> python package,
+    Historical data of stocks are downloaded from Yahoo!Finance website through <a href='https://pypi.org/project/yfinance/'><em>yfinance</em></a> python package,
     and technical indicators are constructed using <a href='https://pypi.org/project/ta/'><em>ta</em></a> python package.
     </h5>
     <ul>
@@ -119,7 +154,9 @@
   </div>
 
   <div class="col-9">
-    <img src='static/cover.jpg' height=300 width=600>
+    <center>
+    <img src='static/workflow1.jpg' height=400 width=850>
+    </center>
     <br><br>
     <form method="POST">
         <div class='field1'>
