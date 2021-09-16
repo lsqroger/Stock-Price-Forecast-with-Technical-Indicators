@@ -53,6 +53,10 @@ def price_forecast(fcst_date, input_ticker):
     if (pd.to_datetime(forecast_date)-pd.to_datetime(max_date)).days > 7:
         return {"error":"error", "max_date":max_date}
     
+    ### if a non-trading forecast date is passed, forecast will not be made (for Backtest)  
+    if (pd.to_datetime(forecast_date) < pd.to_datetime(max_date)) and (len(df_lagged.loc[df_lagged.Date==forecast_date]) == 0):
+        return {"error":"notTrading", "err_msg": 'Invalid prediction due to a non-trading forecast date provided'}
+
     df_lagged = df_lagged.loc[(df_lagged.Date >= start_date)&(df_lagged.Date <= forecast_date)]
     temp_rows = df_lagged.shape[0]
     df_lagged.dropna(axis=0, inplace=True)

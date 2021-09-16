@@ -1,0 +1,7 @@
+entrypoint: "gunicorn -t 0 -b :$PORT main:app"
+env: flex
+resources: 
+  memory_gb: 4
+runtime: python
+runtime_config: 
+  python_version: 3

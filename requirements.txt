@@ -10,4 +10,5 @@ scikit-learn==0.23.2
 scikit-optimize
 matplotlib
 seaborn
-awsebcli
+gunicorn
+google-cloud-storage

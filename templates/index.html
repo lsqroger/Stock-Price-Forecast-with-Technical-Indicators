@@ -155,7 +155,7 @@
 
   <div class="col-9">
     <center>
-    <img src='static/workflow1.jpg' height=400 width=850>
+    <img src='static/workflow2.jpg' height=400 width=850>
     </center>
     <br><br>
     <form method="POST">
@@ -175,6 +175,9 @@
         {% else %}
         {% if value['error'] == "error" %}
         <h3><b>Input date is beyond next 7 days (latest trading date: {{ value['max_date'] }} ) </b></h3>
+        {% else %}
+        {% if value['error'] == 'notTrading' %}
+        <h3><b> {{ value['err_msg'] }} </b></h3>
         {% else %}
         {% if value['flag'] == 'history' %}
         <h3><b><u>Prediction Result (Backtest): </u></b></h3>
@@ -225,69 +228,12 @@
                 <td> {{ value['val_auc'] }}</td>
             </tr>
         </table>
-        <h4><b> ROC Curve: </b></h4>
-        <img src={{ value['figure_link'] }} height=400 width=550>
+        <!-- <h4><b> ROC Curve: </b></h4>
+        <img src={{ value['figure_link'] }} height=400 width=550> 
         <h4><b> Confusion Matrix: </b></h4>
-        <img src={{ value['cm_link'] }} height=400 width=550>
+        <img src={{ value['cm_link'] }} height=400 width=550> -->
+        {% endif %}
         {% endif %}
         {% endif %}
   </div>
 </div>
-
-<!--
-<center>
-    <img src='static/cover.jpg' height=300 width=600>
-    <br>
-    <form method="POST">
-        <label>Enter a date to predict direction of price change (e.g. 2021-09-03): </label>
-        <input name="date">
-        <br><br>
-        <label>Enter ticker of the stock to be predicted (e.g. MSFT)</label>
-        <input name='ticker'>
-        <p> Prediction process may take a few minutes...</p>
-        <br>
-        <input type="submit" value='Predict'>
-        <br>
-        {% if value == null%}
-        <h3><b> No prediction is made yet </b></h3>
-        {% else %}
-        {% if value['error'] == "error" %}
-        <h3><b>Input date is beyond next 7 days (latest trading date: {{ value['max_date'] }} ) </b></h3>
-        {% else %}
-        {% if value['flag'] == 'history' %}
-        <h3><b>Prediction Result (Backtest): </b></h3>
-        <table>
-            <tr>
-                <th>Stock Ticker</th>
-                <th>Current Close Price</th>
-                <th>Previous Close Price (t-7)</th>
-                <th>Actual Change</th>
-                <th>Predicted Change</th>
-            </tr>
-            <tr>
-                <td>{{ value['ticker'] }}</td>
-                <td>{{ value['Current_Close'] }}</td>
-                <td>{{ value['Prev_Close'] }}</td>
-                <td>{{ value['Actual'] }}</td>
-                <td>{{ value['Pred'] }}</td>
-            </tr>
-        </table>
-        {% else %}
-        <h3><b>Prediction Result (Future): </b></h3>
-        <table>
-            <tr>
-                <th>Stock Ticker</th>
-                <th>Predicted Change</th>
-            </tr>
-            <tr>
-                <td>{{ value['ticker'] }}</td>
-                <td>{{ value['Pred'] }}</td>
-            </tr>
-        </table>
-        {% endif %}
-        <br>
-        <h4><b> ROC Curve of Validation Predictions: </b></h4>
-        <img src={{ value['figure_link'] }} height=400 width=800>
-        {% endif %}
-        {% endif %}
-</center> -->
